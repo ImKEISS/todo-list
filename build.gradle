@@ -55,6 +55,9 @@ dependencies {
 			"jakarta.annotation:jakarta.annotation-api",
 			"com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta")
 
+	// MariaDB 설정
+	implementation 'org.mariadb.jdbc:mariadb-java-client:2.7.11'
+
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
