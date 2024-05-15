@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindingResult;
@@ -12,12 +11,12 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import static com.serverstudy.todolist.exception.ErrorCode.DUPLICATE_RESOURCE;
 import static com.serverstudy.todolist.exception.ErrorCode.INVALID_PARAMETER;
 
 @Slf4j
@@ -30,17 +29,16 @@ public class GlobalExceptionHandler /*extends ResponseEntityExceptionHandler*/ {
         return ErrorResponse.from(ex.getErrorCode());
     }
 
-    @ExceptionHandler(DataIntegrityViolationException.class)
-    protected ResponseEntity<ErrorResponse> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
+    /*@ExceptionHandler(DataIntegrityViolationException.class)
+    protected ResponseEntity<ErrorResponse> handleDataIntegrityViolationException(DataIntegrityViolationException ex, Throwable throwable) {
         log.error("데이터 무결성 위반 예외 발생, throw DataIntegrityViolationException : {}", ex.getMessage());
         return ErrorResponse.from(DUPLICATE_RESOURCE);
-    }
+    }*/
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex){
-        log.error("valid 유효성 검사 예외 발생, throw MethodArgumentNotValidException : {}", ex.getMessage());
+    /*@ExceptionHandler(BindException.class)
+    public ResponseEntity<ErrorResponse> handleBindException(BindException ex, final BindingResult bindingResult) {
 
-        BindingResult bindingResult = ex.getBindingResult();
+        log.error("valid 유효성 검사 예외 발생, throw BindException : {}", ex.getMessage());
 
         List<String> messageList = new ArrayList<>();
 
@@ -53,11 +51,33 @@ public class GlobalExceptionHandler /*extends ResponseEntityExceptionHandler*/ {
         }
 
         return ErrorResponse.of(INVALID_PARAMETER, messageList);
+    }*/
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex){
+        log.error("valid 유효성 검사 예외 발생, throw MethodArgumentNotValidException : {}", ex.getMessage());
+
+        BindingResult bindingResult = ex.getBindingResult();
+
+        List<String> messageList = new ArrayList<>();
+
+        for (FieldError fieldError : bindingResult.getFieldErrors()) {
+            String messageBuilder = "[" +
+                    fieldError.getField() +
+                    "] " +
+                    fieldError.getDefaultMessage() +
+                    " 입력된 값: [" +
+                    fieldError.getRejectedValue() +
+                    "]";
+            messageList.add(messageBuilder);
+        }
+
+        return ErrorResponse.of(INVALID_PARAMETER, messageList);
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ErrorResponse> handleConstraintViolationException(ConstraintViolationException ex){
-        log.error("validated 유효성 검사 예외 발생, throw MethodArgumentNotValidException : {}", ex.getMessage());
+        log.error("validated 유효성 검사 예외 발생, throw ConstraintViolationException : {}", ex.getMessage());
 
         Iterator<ConstraintViolation<?>> iterator = ex.getConstraintViolations().iterator();
 
@@ -65,7 +85,13 @@ public class GlobalExceptionHandler /*extends ResponseEntityExceptionHandler*/ {
 
         while (iterator.hasNext()) {
             final ConstraintViolation<?> constraintViolation = iterator.next();
-            String messageBuilder = constraintViolation.getMessage() +
+            String propertyPath = constraintViolation.getPropertyPath().toString();
+            String propertyName = propertyPath.substring(propertyPath.lastIndexOf('.') + 1); // 전체 속성 경로에서 속성 이름만 가져온다.
+
+            String messageBuilder = "[" +
+                    propertyName +
+                    "] " +
+                    constraintViolation.getMessage() +
                     " 입력된 값: [" +
                     constraintViolation.getInvalidValue() +
                     "]";
@@ -83,7 +109,14 @@ public class GlobalExceptionHandler /*extends ResponseEntityExceptionHandler*/ {
             String message = mismatchedInputException.getPath().get(0).getFieldName() + " 필드의 타입이 올바르지 않습니다.";
             return ErrorResponse.of(INVALID_PARAMETER, message);
         }
-        return ErrorResponse.of(INVALID_PARAMETER, "확인할 수 없는 형태의 데이터가 들어왔습니다");
+        return ErrorResponse.of(INVALID_PARAMETER, "확인할 수 없는 형태의 데이터가 들어왔습니다.");
     }
 
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException ex) {
+        log.error("파라미터 타입 불일치 예외 발생, throw MethodArgumentTypeMismatchException : {}", ex.getMessage());
+
+        String message = ex.getPropertyName() + " 파라미터의 타입이 올바르지 않습니다.";
+        return ErrorResponse.of(INVALID_PARAMETER, message);
+    }
 }
