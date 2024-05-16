@@ -41,8 +41,8 @@ public interface TodoReq {
         @Enum(enumClass = Priority.class, ignoreCase = true)
         private String priority;
 
-        @Schema(title = "진행 상황", description = "(TODO|DOING|DONE) 중 하나를 대소문자 구분 없이 입력",
-                example = "TODO", allowableValues = {"TODO", "DOING", "DONE"})
+        @Schema(title = "진행 상황", description = "(TODO|DONE) 중 하나를 대소문자 구분 없이 입력",
+                example = "TODO", allowableValues = {"TODO", "DONE"})
         @NotNull(message = "값이 비어있을 수 없습니다. 값을 입력해주세요.")
         @Enum(enumClass = Progress.class, ignoreCase = true)
         private String progress;
@@ -76,8 +76,8 @@ public interface TodoReq {
         @Enum(enumClass = Priority.class, ignoreCase = true)
         private String priority;
 
-        @Schema(title = "진행 상황", description = "미기입 또는 (TODO|DOING|DONE) 중 하나를 대소문자 구분 없이 입력",
-                example = "TODO", allowableValues = {"TODO", "DOING", "DONE"})
+        @Schema(title = "진행 상황", description = "미기입 또는 (TODO|DONE) 중 하나를 대소문자 구분 없이 입력",
+                example = "TODO", allowableValues = {"TODO", "DONE"})
         @Enum(enumClass = Progress.class, ignoreCase = true)
         private String progress;
 
@@ -124,8 +124,8 @@ public interface TodoReq {
         @Enum(enumClass = Priority.class, ignoreCase = true)
         private String priority;
 
-        @Schema(title = "진행 상황", description = "(TODO|DOING|DONE) 중 하나를 대소문자 구분 없이 입력",
-                example = "DOING", allowableValues = {"TODO", "DOING", "DONE"})
+        @Schema(title = "진행 상황", description = "(TODO|DONE) 중 하나를 대소문자 구분 없이 입력",
+                example = "TODO", allowableValues = {"TODO", "DONE"})
         @NotNull(message = "값이 비어있을 수 없습니다. 값을 입력해주세요.")
         @Enum(enumClass = Progress.class, ignoreCase = true)
         private String progress;

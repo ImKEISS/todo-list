@@ -6,7 +6,7 @@ import java.util.Arrays;
 
 @Getter
 public enum Progress {
-    TODO, DOING, DONE;
+    TODO, DONE;
 
     public static Progress getProgress(String inputProgress) {
 

@@ -58,8 +58,7 @@ public class Todo {
     }
 
     public void switchProgress() {
-        if (this.progress.equals(Progress.TODO)) this.progress = Progress.DOING;
-        else if (this.progress.equals(Progress.DOING)) this.progress = Progress.DONE;
+        if (this.progress.equals(Progress.TODO)) this.progress = Progress.DONE;
         else this.progress = Progress.TODO;
     }
 

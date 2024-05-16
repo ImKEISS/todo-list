@@ -93,7 +93,7 @@ public class TodoController implements ExampleData {
         return ResponseEntity.ok(updatedTodoId);
     }
 
-    @Operation(summary = "투두 진행 상황 수정", description = "해당 투두의 진행 상황을 변경합니다. TODO -> DOING -> DONE -> TODO 순서로 바뀝니다. ", parameters = {
+    @Operation(summary = "투두 진행 상황 수정", description = "해당 투두의 진행 상황을 변경합니다. TODO -> DONE -> TODO 순서로 바뀝니다. ", parameters = {
             @Parameter(name = "todoId", description = "투두 id", example = "1")
     }, responses = {
             @ApiResponse(responseCode = "200", description = "투두 진행 상황 수정 성공", useReturnTypeSchema = true),
