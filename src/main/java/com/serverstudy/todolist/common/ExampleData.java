@@ -13,6 +13,17 @@ public interface ExampleData {
               ]
             }
             """;
+    String BAD_PASSWORD_DATA = """
+            {
+               "timestamp": "2024-05-16T22:21:04.7017558",
+               "status": 401,
+               "error": "UNAUTHORIZED",
+               "code": "BAD_PASSWORD",
+               "message": [
+                 "비밀번호가 옳지 않습니다."
+               ]
+            }
+            """;
     String USER_NOT_FOUND_DATA = """
             {
               "timestamp": "2024-05-15T11:30:54.8218419",

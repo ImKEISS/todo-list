@@ -45,17 +45,10 @@ public interface UserReq {
         }
     }
 
-    @Schema(description = "유저 정보 수정 요청 DTO")
+    @Schema(description = "유저 닉네임 수정 요청 DTO")
     @Getter
     @NoArgsConstructor(access = AccessLevel.PRIVATE)
-    class UserPatch {
-
-        @Schema(title = "비밀번호", description = "영문 대소문자, 숫자가 포함되며 공백이 없는 8~16자로 입력",
-                example = "newExamplePWD123")
-        @NotBlank(message = "비밀번호는 공백으로 입력할 수 없습니다.")
-        @Pattern(regexp = "(?=.*[0-9])(?=.*[a-zA-Z])(?=\\S+$).{8,16}",
-                 message = "비밀번호는 영문 대소문자, 숫자가 포함된 8~16자리여야 합니다.")
-        private String password;
+    class UserPatchNickname {
 
         @Schema(title = "닉네임", description = "-,_가 아닌 특수문자를 제외한 2~10자리 문자 입력",
                 example = "newEx닉네임1")
@@ -65,5 +58,24 @@ public interface UserReq {
         private String nickname;
     }
 
+    @Schema(description = "유저 비밀번호 수정 요청 DTO")
+    @Getter
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    class UserPatchPassword {
+
+        @Schema(title = "기존 비밀번호", description = "영문 대소문자, 숫자가 포함되며 공백이 없는 8~16자로 입력",
+                example = "examplePWD123")
+        @NotBlank(message = "비밀번호는 공백으로 입력할 수 없습니다.")
+        @Pattern(regexp = "(?=.*[0-9])(?=.*[a-zA-Z])(?=\\S+$).{8,16}",
+                message = "비밀번호는 영문 대소문자, 숫자가 포함된 8~16자리여야 합니다.")
+        private String existingPassword;
+
+        @Schema(title = "새 비밀번호", description = "영문 대소문자, 숫자가 포함되며 공백이 없는 8~16자로 입력",
+                example = "newExamplePWD123")
+        @NotBlank(message = "비밀번호는 공백으로 입력할 수 없습니다.")
+        @Pattern(regexp = "(?=.*[0-9])(?=.*[a-zA-Z])(?=\\S+$).{8,16}",
+                message = "비밀번호는 영문 대소문자, 숫자가 포함된 8~16자리여야 합니다.")
+        private String newPassword;
+    }
 
 }

@@ -1,7 +1,8 @@
 package com.serverstudy.todolist.service;
 
 import com.serverstudy.todolist.domain.User;
-import com.serverstudy.todolist.dto.request.UserReq.UserPatch;
+import com.serverstudy.todolist.dto.request.UserReq.UserPatchNickname;
+import com.serverstudy.todolist.dto.request.UserReq.UserPatchPassword;
 import com.serverstudy.todolist.dto.request.UserReq.UserPost;
 import com.serverstudy.todolist.dto.response.UserRes;
 import com.serverstudy.todolist.exception.CustomException;
@@ -53,11 +54,21 @@ public class UserService {
     }
 
     @Transactional
-    public long modify(UserPatch userPatch, Long userId) {
+    public long modifyNickname(UserPatchNickname userPatchNickname, Long userId) {
 
         User user = getUser(userId);
 
-        user.modifyUser(userPatch);
+        user.modifyNickname(userPatchNickname);
+
+        return user.getId();
+    }
+
+    @Transactional
+    public long modifyPassword(UserPatchPassword userPatchPassword, Long userId) {
+
+        User user = getUser(userId);
+
+        user.modifyPassword(userPatchPassword);
 
         return user.getId();
     }
@@ -75,6 +86,8 @@ public class UserService {
     }
 
     private User getUser(Long userId) {
-        return userRepository.findById(userId).orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
     }
 }

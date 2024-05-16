@@ -1,7 +1,8 @@
 package com.serverstudy.todolist.controller;
 
 import com.serverstudy.todolist.common.ExampleData;
-import com.serverstudy.todolist.dto.request.UserReq.UserPatch;
+import com.serverstudy.todolist.dto.request.UserReq.UserPatchNickname;
+import com.serverstudy.todolist.dto.request.UserReq.UserPatchPassword;
 import com.serverstudy.todolist.dto.request.UserReq.UserPost;
 import com.serverstudy.todolist.dto.response.UserRes;
 import com.serverstudy.todolist.exception.ErrorResponse;
@@ -90,10 +91,10 @@ public class UserController implements ExampleData {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "유저 정보 수정", description = "해당 유저의 정보를 수정합니다.", parameters = {
+    @Operation(summary = "유저 닉네임 수정", description = "해당 유저의 닉네임을 수정합니다.", parameters = {
             @Parameter(name = "userId", description = "유저 Id", example = "1")
     }, responses = {
-            @ApiResponse(responseCode = "200", description = "유저 정보 수정 성공", useReturnTypeSchema = true),
+            @ApiResponse(responseCode = "200", description = "유저 닉네임 수정 성공", useReturnTypeSchema = true),
             @ApiResponse(responseCode = "400", description = "잘못된 파라미터 입력", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
                     @ExampleObject(name = "INVALID_PARAMETER", value = INVALID_PARAMETER_DATA),
             })),
@@ -101,10 +102,32 @@ public class UserController implements ExampleData {
                     @ExampleObject(name = "USER_NOT_FOUND", value = USER_NOT_FOUND_DATA),
             }))
     })
-    @PatchMapping
-    public ResponseEntity<Long> patchUser(@Valid @RequestBody UserPatch UserPatch, @NotNull Long userId) {
+    @PatchMapping("/nickname")
+    public ResponseEntity<Long> patchUserNickname(@Valid @RequestBody UserPatchNickname userPatchNickname, @NotNull Long userId) {
 
-        Long modifiedUserId = userService.modify(UserPatch, userId);
+        Long modifiedUserId = userService.modifyNickname(userPatchNickname, userId);
+
+        return ResponseEntity.ok(modifiedUserId);
+    }
+
+    @Operation(summary = "유저 비밀번호 수정", description = "해당 유저의 비밀번호를 수정합니다.", parameters = {
+            @Parameter(name = "userId", description = "유저 Id", example = "1")
+    }, responses = {
+            @ApiResponse(responseCode = "200", description = "유저 비밀번호 수정 성공", useReturnTypeSchema = true),
+            @ApiResponse(responseCode = "400", description = "잘못된 파라미터 입력", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
+                    @ExampleObject(name = "INVALID_PARAMETER", value = INVALID_PARAMETER_DATA),
+            })),
+            @ApiResponse(responseCode = "401", description = "기존 비밀번호가 일치하지 않음", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
+                    @ExampleObject(name = "BAD_PASSWORD", value = BAD_PASSWORD_DATA),
+            })),
+            @ApiResponse(responseCode = "404", description = "유저가 존재하지 않음", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
+                    @ExampleObject(name = "USER_NOT_FOUND", value = USER_NOT_FOUND_DATA),
+            }))
+    })
+    @PatchMapping("/password")
+    public ResponseEntity<Long> patchUserPassword(@Valid @RequestBody UserPatchPassword userPatchPassword, @NotNull Long userId) {
+
+        Long modifiedUserId = userService.modifyPassword(userPatchPassword, userId);
 
         return ResponseEntity.ok(modifiedUserId);
     }
