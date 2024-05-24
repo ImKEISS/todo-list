@@ -51,7 +51,7 @@ public class UserController implements ExampleData {
         return ResponseEntity.status(HttpStatus.CREATED).body(userId);
     }
 
-    @Operation(summary = "이메일 중복 검사", description = "이메일의 중복 여부를 검사합니다.", parameters = {
+    @Operation(summary = "이메일 중복 검사", description = "이메일의 중복 여부를 검사합니다.", deprecated = true, parameters = {
             @Parameter(name = "email", description = "중복 검사할 이메일", example = "example@gmail.com")
     }, responses = {
             @ApiResponse(responseCode = "200", description = "중복 없음", useReturnTypeSchema = true),
