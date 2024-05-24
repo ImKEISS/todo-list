@@ -1,6 +1,5 @@
 package com.serverstudy.todolist.service;
 
-import com.serverstudy.todolist.domain.Folder;
 import com.serverstudy.todolist.domain.Todo;
 import com.serverstudy.todolist.domain.enums.Priority;
 import com.serverstudy.todolist.domain.enums.Progress;
@@ -10,7 +9,6 @@ import com.serverstudy.todolist.dto.request.TodoReq.TodoPut;
 import com.serverstudy.todolist.dto.response.TodoRes;
 import com.serverstudy.todolist.exception.CustomException;
 import com.serverstudy.todolist.exception.ErrorCode;
-import com.serverstudy.todolist.repository.FolderRepository;
 import com.serverstudy.todolist.repository.TodoRepository;
 import com.serverstudy.todolist.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +20,6 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
-import static com.serverstudy.todolist.exception.ErrorCode.FOLDER_NOT_FOUND;
 import static com.serverstudy.todolist.exception.ErrorCode.TODO_NOT_FOUND;
 
 @Service
@@ -32,7 +29,6 @@ public class TodoService {
 
     private final TodoRepository todoRepository;
     private final UserRepository userRepository;
-    private final FolderRepository folderRepository;
 
     public long create(TodoPost todoPost, Long userId) {
 
@@ -40,36 +36,23 @@ public class TodoService {
             throw new CustomException(ErrorCode.USER_NOT_FOUND);
         }
 
-        Folder folder = (todoPost.getFolderId() != null)
-                ? getFolder(todoPost.getFolderId())
-                : null;
-
-        Todo todo = todoPost.toEntity(userId, folder);
+        Todo todo = todoPost.toEntity(userId);
 
         return todoRepository.save(todo).getId();
     }
 
     public List<TodoRes> findAllByConditions(TodoGet todoGet, Long userId) {
 
-        Long folderId = todoGet.getFolderId();
         Priority priority = todoGet.getPriority();
         Progress progress = todoGet.getProgress();
         Boolean isDeleted = todoGet.getIsDeleted();
 
-        List<Todo> todoList = todoRepository.findAllByConditions(folderId, userId, priority, progress, isDeleted);
+        List<Todo> todoList = todoRepository.findAllByConditions(userId, priority, progress, isDeleted);
 
         return todoList.stream().map(todo -> {
 
             Integer dateFromDelete = (todo.getIsDeleted())
                     ? (int) ChronoUnit.DAYS.between(todo.getDeletedTime(), LocalDateTime.now())
-                    : null;
-
-            Long foundFolderId = (todo.getFolder() != null)
-                    ? todo.getFolder().getId()
-                    : null;
-
-            String folderName = (todo.getFolder() != null)
-                    ? todo.getFolder().getName()
                     : null;
 
             return TodoRes.builder()
@@ -81,8 +64,6 @@ public class TodoService {
                     .progress(todo.getProgress())
                     .isDeleted(todo.getIsDeleted())
                     .dateFromDelete(dateFromDelete)
-                    .folderId(foundFolderId)
-                    .folderName(folderName)
                     .build();
         }).toList();
     }
@@ -92,11 +73,7 @@ public class TodoService {
 
         Todo todo = getTodo(todoId);
 
-        Folder folder = (todoPut.getFolderId() != null)
-                ? getFolder(todoPut.getFolderId())
-                : null;
-
-        todo.updateTodo(todoPut, folder);
+        todo.updateTodo(todoPut);
 
         return todo.getId();
     }
@@ -107,20 +84,6 @@ public class TodoService {
         Todo todo = getTodo(todoId);
 
         todo.switchProgress();
-
-        return todo.getId();
-    }
-
-    @Transactional
-    public long moveFolder(Long folderId, Long todoId) {
-
-        Todo todo = getTodo(todoId);
-
-        Folder folder = (folderId != null)
-                ? getFolder(folderId)
-                : null;
-
-        todo.changeFolder(folder);
 
         return todo.getId();
     }
@@ -164,12 +127,6 @@ public class TodoService {
 
         return todoRepository.findById(todoId)
                 .orElseThrow(() -> new CustomException(TODO_NOT_FOUND));
-    }
-
-    private Folder getFolder(Long folderId) {
-
-        return folderRepository.findById(folderId)
-                .orElseThrow(() -> new CustomException(FOLDER_NOT_FOUND));
     }
 
 }

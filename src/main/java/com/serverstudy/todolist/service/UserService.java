@@ -6,7 +6,6 @@ import com.serverstudy.todolist.dto.request.UserReq.UserPatchPassword;
 import com.serverstudy.todolist.dto.request.UserReq.UserPost;
 import com.serverstudy.todolist.dto.response.UserRes;
 import com.serverstudy.todolist.exception.CustomException;
-import com.serverstudy.todolist.repository.FolderRepository;
 import com.serverstudy.todolist.repository.TodoRepository;
 import com.serverstudy.todolist.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +22,6 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final TodoRepository todoRepository;
-    private final FolderRepository folderRepository;
 
     @Transactional
     public long join(UserPost userPost) {
@@ -78,9 +76,8 @@ public class UserService {
 
         User user = getUser(userId);
 
-        // 투두 리스트와 폴더 삭제
+        // 투두 리스트 삭제
         todoRepository.deleteAll(todoRepository.findAllByUserId(userId));
-        folderRepository.deleteAll(folderRepository.findAllByUserId(userId));
 
         userRepository.delete(user);
     }

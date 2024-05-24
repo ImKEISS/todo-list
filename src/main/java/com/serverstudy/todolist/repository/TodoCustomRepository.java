@@ -8,5 +8,5 @@ import java.util.List;
 
 public interface TodoCustomRepository {
 
-    List<Todo> findAllByConditions(Long folderId, Long userId, Priority priority, Progress progress, Boolean isDeleted);
+    List<Todo> findAllByConditions(Long userId, Priority priority, Progress progress, Boolean isDeleted);
 }

@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static com.serverstudy.todolist.dto.request.TodoReq.TodoFolderPatch;
 import static com.serverstudy.todolist.dto.request.TodoReq.TodoPut;
 
 @Tag(name = "Todo", description = "Todo API 입니다.")
@@ -43,16 +42,14 @@ public class TodoController implements ExampleData {
             @ApiResponse(responseCode = "400", description = "잘못된 파라미터 입력", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
                     @ExampleObject(name = "INVALID_PARAMETER", value = INVALID_PARAMETER_DATA),
             })),
-            @ApiResponse(responseCode = "404", description = "유저가 존재하지 않음 / 폴더가 존재하지 않음", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
-                    @ExampleObject(name = "USER_NOT_FOUND", value = USER_NOT_FOUND_DATA),
-                    @ExampleObject(name = "FOLDER_NOT_FOUND", value = FOLDER_NOT_FOUND_DATA),
+            @ApiResponse(responseCode = "404", description = "유저가 존재하지 않음", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
+                    @ExampleObject(name = "USER_NOT_FOUND", value = USER_NOT_FOUND_DATA)
             }))
     })
     @PostMapping
     public ResponseEntity<Long> postTodo(@Valid @RequestBody TodoPost todoPost, @NotNull Long userId) {
 
         Long todoId = todoService.create(todoPost, userId);
-
 
         return ResponseEntity.status(HttpStatus.CREATED).body(todoId);
     }
@@ -80,9 +77,8 @@ public class TodoController implements ExampleData {
             @ApiResponse(responseCode = "400", description = "잘못된 파라미터 입력", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
                     @ExampleObject(name = "INVALID_PARAMETER", value = INVALID_PARAMETER_DATA),
             })),
-            @ApiResponse(responseCode = "404", description = "투두가 존재하지 않음 / 폴더가 존재하지 않음", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
-                    @ExampleObject(name = "TODO_NOT_FOUND", value = TODO_NOT_FOUND_DATA),
-                    @ExampleObject(name = "FOLDER_NOT_FOUND", value = FOLDER_NOT_FOUND_DATA),
+            @ApiResponse(responseCode = "404", description = "투두가 존재하지 않음", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
+                    @ExampleObject(name = "TODO_NOT_FOUND", value = TODO_NOT_FOUND_DATA)
             }))
     })
     @PutMapping("/{todoId}")
@@ -107,26 +103,6 @@ public class TodoController implements ExampleData {
         Long switchedTodoId = todoService.switchProgress(todoId);
 
         return ResponseEntity.ok(switchedTodoId);
-    }
-
-    @Operation(summary = "투두 폴더 변경", description = "해당 투두의 폴더를 변경합니다. 미기입 시 폴더 없음으로 변경합니다.", parameters = {
-            @Parameter(name = "todoId", description = "투두 id", example = "1")
-    }, responses = {
-            @ApiResponse(responseCode = "200", description = "투두 폴더 변경 성공", useReturnTypeSchema = true),
-            @ApiResponse(responseCode = "400", description = "잘못된 파라미터 입력", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
-                    @ExampleObject(name = "INVALID_PARAMETER", value = INVALID_PARAMETER_DATA),
-            })),
-            @ApiResponse(responseCode = "404", description = "투두가 존재하지 않음 / 폴더가 존재하지 않음", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
-                    @ExampleObject(name = "TODO_NOT_FOUND", value = TODO_NOT_FOUND_DATA),
-                    @ExampleObject(name = "FOLDER_NOT_FOUND", value = FOLDER_NOT_FOUND_DATA),
-            }))
-    })
-    @PatchMapping("/{todoId}/folder")
-    public ResponseEntity<Long> patchTodoFolder(@RequestBody TodoFolderPatch todoFolderPatch, @PathVariable Long todoId) {
-
-        Long movedTodoId = todoService.moveFolder(todoFolderPatch.getFolderId(), todoId);
-
-        return ResponseEntity.ok(movedTodoId);
     }
 
     @Operation(summary = "투두 삭제", description = "해당 투두를 임시/영구 삭제합니다.", parameters = {

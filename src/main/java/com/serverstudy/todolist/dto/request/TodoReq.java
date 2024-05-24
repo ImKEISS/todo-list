@@ -1,7 +1,6 @@
 package com.serverstudy.todolist.dto.request;
 
 import com.serverstudy.todolist.common.Enum;
-import com.serverstudy.todolist.domain.Folder;
 import com.serverstudy.todolist.domain.Todo;
 import com.serverstudy.todolist.domain.enums.Priority;
 import com.serverstudy.todolist.domain.enums.Progress;
@@ -47,11 +46,7 @@ public interface TodoReq {
         @Enum(enumClass = Progress.class, ignoreCase = true)
         private String progress;
 
-        @Schema(title = "폴더 Id", description = "미기입 또는 폴더 기본키 값에 해당하는 숫자 입력",
-                example = "1")
-        private Long folderId;
-
-        public Todo toEntity(long userId, Folder folder) {
+        public Todo toEntity(long userId) {
             return Todo.builder()
                     .title(title == null ? "" : title)
                     .description(description == null ? "" : description)
@@ -59,7 +54,6 @@ public interface TodoReq {
                     .priority(Priority.valueOf(priority))
                     .progress(Progress.valueOf(progress))
                     .userId(userId)
-                    .folder(folder)
                     .build();
         }
 
@@ -85,10 +79,6 @@ public interface TodoReq {
                 example = "false", allowableValues = {"true", "false"})
         @NotNull(message = "값이 비어있을 수 없습니다. 값을 입력해주세요.")
         private Boolean isDeleted;
-
-        @Schema(title = "폴더 Id", description = "미기입 또는 폴더 기본키 값에 해당하는 숫자 입력",
-                example = "1")
-        private Long folderId;
 
         public Priority getPriority() {
             return (priority == null) ? null : Priority.valueOf(priority);
@@ -130,10 +120,6 @@ public interface TodoReq {
         @Enum(enumClass = Progress.class, ignoreCase = true)
         private String progress;
 
-        @Schema(title = "폴더 Id", description = "미기입 또는 폴더 기본키 값에 해당하는 숫자 입력",
-                example = "1")
-        private Long folderId;
-
         public String getTitle() {
             return title == null ? "" : title;
         }
@@ -149,16 +135,6 @@ public interface TodoReq {
         public Progress getProgress() {
             return Progress.valueOf(progress);
         }
-    }
-
-    @Schema(description = "투두 폴더 이동 요청 DTO")
-    @Getter
-    @NoArgsConstructor(access = AccessLevel.PRIVATE)
-    class TodoFolderPatch {
-
-        @Schema(title = "폴더 Id", description = "미기입 또는 폴더 기본키 값에 해당하는 숫자 입력",
-                example = "1")
-        private Long folderId;
     }
 
 }

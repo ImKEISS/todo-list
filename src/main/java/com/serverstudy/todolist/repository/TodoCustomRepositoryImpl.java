@@ -18,15 +18,12 @@ public class TodoCustomRepositoryImpl implements TodoCustomRepository {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<Todo> findAllByConditions(Long folderId, Long userId, Priority priority, Progress progress, Boolean isDeleted) {
+    public List<Todo> findAllByConditions(Long userId, Priority priority, Progress progress, Boolean isDeleted) {
 
         QTodo todo = QTodo.todo;
         BooleanExpression booleanExpression;
 
-        if (folderId != null)
-            booleanExpression = todo.folder.id.eq(folderId);
-        else
-            booleanExpression = todo.userId.eq(userId);
+        booleanExpression = todo.userId.eq(userId);
 
         if (priority != null)
             booleanExpression = booleanExpression.and(todo.priority.eq(priority));

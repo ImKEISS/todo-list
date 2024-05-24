@@ -41,12 +41,8 @@ public class Todo {
 
     private Long userId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "folder_id")
-    private Folder folder;
-
     @Builder
-    private Todo(String title, String description, LocalDateTime deadline, Priority priority, Progress progress, long userId, Folder folder) {
+    private Todo(String title, String description, LocalDateTime deadline, Priority priority, Progress progress, long userId) {
         this.title = title;
         this.description = description;
         this.deadline = deadline;
@@ -54,7 +50,6 @@ public class Todo {
         this.progress = progress;
         this.isDeleted = false;
         this.userId = userId;
-        this.folder = folder;
     }
 
     public void switchProgress() {
@@ -67,16 +62,11 @@ public class Todo {
         this.deletedTime = LocalDateTime.now();
     }
 
-    public void changeFolder(Folder folder) {
-        this.folder = folder;
-    }
-
-    public void updateTodo(TodoPut todoPut, Folder folder) {
+    public void updateTodo(TodoPut todoPut) {
         this.title = todoPut.getTitle();
         this.description = todoPut.getDescription();
         this.deadline = todoPut.getDeadline();
         this.priority = todoPut.getPriority();
         this.progress = todoPut.getProgress();
-        changeFolder(folder);
     }
 }
