@@ -42,7 +42,7 @@ public class TodoService {
                 ? null
                 : Priority.valueOf(priorityName);
 
-        List<Todo> todoList = todoRepository.findAllByUserIdAndPriorityOrderByProgressDesc(userId, priority);
+        List<Todo> todoList = todoRepository.findAllByUserIdAndPriorityOrderByProgress(userId, priority);
 
         return todoList.stream().map(todo ->
                 TodoRes.builder()
