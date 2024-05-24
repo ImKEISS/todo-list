@@ -35,10 +35,6 @@ public class Todo {
     @NotNull
     private Progress progress;
 
-    private Boolean isDeleted;
-
-    private LocalDateTime deletedTime;
-
     private Long userId;
 
     @Builder
@@ -48,18 +44,12 @@ public class Todo {
         this.deadline = deadline;
         this.priority = priority;
         this.progress = progress;
-        this.isDeleted = false;
         this.userId = userId;
     }
 
     public void switchProgress() {
         if (this.progress.equals(Progress.TODO)) this.progress = Progress.DONE;
         else this.progress = Progress.TODO;
-    }
-
-    public void moveToTrash() {
-        this.isDeleted = true;
-        this.deletedTime = LocalDateTime.now();
     }
 
     public void updateTodo(TodoPut todoPut) {

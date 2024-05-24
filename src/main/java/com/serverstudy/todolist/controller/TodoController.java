@@ -1,7 +1,8 @@
 package com.serverstudy.todolist.controller;
 
+import com.serverstudy.todolist.common.Enum;
 import com.serverstudy.todolist.common.ExampleData;
-import com.serverstudy.todolist.dto.request.TodoReq.TodoGet;
+import com.serverstudy.todolist.domain.enums.Priority;
 import com.serverstudy.todolist.dto.request.TodoReq.TodoPost;
 import com.serverstudy.todolist.dto.response.TodoRes;
 import com.serverstudy.todolist.exception.ErrorResponse;
@@ -54,7 +55,7 @@ public class TodoController implements ExampleData {
         return ResponseEntity.status(HttpStatus.CREATED).body(todoId);
     }
 
-    @Operation(summary = "투두 목록 조회", description = "조건에 맞는 투두 목록을 가져옵니다.", parameters = {
+    @Operation(summary = "투두 목록 조회", description = "조건에 맞는 투두 목록을 가져옵니다. 진행 상황이 'TODO' -> 'DONE' 순서로 정렬되며, 투두 id 순서대로 가져옵니다.", parameters = {
             @Parameter(name = "userId", description = "유저 id", example = "1")
     }, responses = {
             @ApiResponse(responseCode = "200", description = "투두 목록 조회 성공", useReturnTypeSchema = true),
@@ -63,9 +64,14 @@ public class TodoController implements ExampleData {
             }))
     })
     @GetMapping
-    public ResponseEntity<List<TodoRes>> getTodosByRequirements(@Valid @ModelAttribute TodoGet todoGet, @NotNull Long userId) {
+    public ResponseEntity<List<TodoRes>> getTodosByRequirement(
+            @Schema(title = "우선 순위", description = "(PRIMARY|SECONDARY|TERTIARY) 중 하나를 대소문자 구분 없이 입력",
+                    example = "PRIMARY", allowableValues = {"PRIMARY", "SECONDARY", "TERTIARY"})
+            @NotNull(message = "값이 비어있을 수 없습니다. 값을 입력해주세요.")
+            @Enum(enumClass = Priority.class, ignoreCase = true) String priority
+            , @NotNull Long userId) {
 
-        List<TodoRes> responseList = todoService.findAllByConditions(todoGet, userId);
+        List<TodoRes> responseList = todoService.findAllByRequirement(priority, userId);
 
         return ResponseEntity.ok(responseList);
     }
@@ -105,26 +111,19 @@ public class TodoController implements ExampleData {
         return ResponseEntity.ok(switchedTodoId);
     }
 
-    @Operation(summary = "투두 삭제", description = "해당 투두를 임시/영구 삭제합니다.", parameters = {
-            @Parameter(name = "todoId", description = "투두 id", example = "1"),
-            @Parameter(name = "restore", description = "임시 삭제 여부, true 시 임시로 삭제하고 30일 뒤 영구 삭제, false 시 즉시 영구 삭제", example = "true")
+    @Operation(summary = "투두 삭제", description = "해당 투두를 삭제합니다.", parameters = {
+            @Parameter(name = "todoId", description = "투두 id", example = "1")
     }, responses = {
-            @ApiResponse(responseCode = "200", description = "투두 임시 삭제 성공", useReturnTypeSchema = true),
-            @ApiResponse(responseCode = "204", description = "투두 영구 삭제 성공", content = @Content(schema = @Schema(implementation = Void.class))),
-            @ApiResponse(responseCode = "400", description = "잘못된 파라미터 입력", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
-                    @ExampleObject(name = "INVALID_PARAMETER", value = INVALID_PARAMETER_DATA),
-            })),
+            @ApiResponse(responseCode = "204", description = "투두 삭제 성공", content = @Content(schema = @Schema(implementation = Void.class))),
             @ApiResponse(responseCode = "404", description = "투두가 존재하지 않음", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
                     @ExampleObject(name = "TODO_NOT_FOUND", value = TODO_NOT_FOUND_DATA),
             }))
     })
     @DeleteMapping("/{todoId}")
-    public ResponseEntity<Long> deleteTodo(@PathVariable Long todoId, @NotNull Boolean restore) {
+    public ResponseEntity<Long> deleteTodo(@PathVariable Long todoId) {
 
-        Long result = todoService.delete(todoId, restore);
+        todoService.delete(todoId);
 
-        return (result != null)
-                ? ResponseEntity.status(HttpStatus.OK).body(result)
-                : ResponseEntity.noContent().build();
+        return ResponseEntity.noContent().build();
     }
 }

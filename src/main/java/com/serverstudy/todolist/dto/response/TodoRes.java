@@ -30,21 +30,13 @@ public class TodoRes {
     @Schema(title = "진행 상황", description = "진행 상황", example = "DONE")
     private final Progress progress;
 
-    @Schema(title = "임시 삭제 여부", description = "임시 삭제 여부", example = "true")
-    private final boolean isDeleted;
-
-    @Schema(title = "임시 삭제 이후 지난 날짜", description = "임시 삭제로부터 지나간 날짜 (null 또는 0부터 최대 30일)", example = "12")
-    private final Integer dateFromDelete;
-
     @Builder
-    private TodoRes(Long id, String title, String description, LocalDateTime deadline, Priority priority, Progress progress, boolean isDeleted, Integer dateFromDelete) {
+    private TodoRes(Long id, String title, String description, LocalDateTime deadline, Priority priority, Progress progress) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.deadline = deadline;
         this.priority = priority;
         this.progress = progress;
-        this.isDeleted = isDeleted;
-        this.dateFromDelete = dateFromDelete;
     }
 }

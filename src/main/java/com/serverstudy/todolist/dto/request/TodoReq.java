@@ -34,8 +34,8 @@ public interface TodoReq {
                 example = "2024-05-15T23:59:00Z")
         private LocalDateTime deadline;
 
-        @Schema(title = "우선 순위", description = "(NONE|PRIMARY|SECONDARY|TERTIARY) 중 하나를 대소문자 구분 없이 입력",
-                example = "NONE", allowableValues = {"NONE", "PRIMARY", "SECONDARY", "TERTIARY"})
+        @Schema(title = "우선 순위", description = "(PRIMARY|SECONDARY|TERTIARY) 중 하나를 대소문자 구분 없이 입력",
+                example = "PRIMARY", allowableValues = {"PRIMARY", "SECONDARY", "TERTIARY"})
         @NotNull(message = "값이 비어있을 수 없습니다. 값을 입력해주세요.")
         @Enum(enumClass = Priority.class, ignoreCase = true)
         private String priority;
@@ -59,37 +59,6 @@ public interface TodoReq {
 
     }
 
-    @Schema(description = "투두 조회 요청 조건 DTO")
-    @Getter
-    @Setter
-    @NoArgsConstructor(access = AccessLevel.PRIVATE)
-    class TodoGet {
-
-        @Schema(title = "우선 순위", description = "미기입 또는 (NONE|PRIMARY|SECONDARY|TERTIARY) 중 하나를 대소문자 구분 없이 입력",
-                example = "NONE", allowableValues = {"NONE", "PRIMARY", "SECONDARY", "TERTIARY"})
-        @Enum(enumClass = Priority.class, ignoreCase = true)
-        private String priority;
-
-        @Schema(title = "진행 상황", description = "미기입 또는 (TODO|DONE) 중 하나를 대소문자 구분 없이 입력",
-                example = "TODO", allowableValues = {"TODO", "DONE"})
-        @Enum(enumClass = Progress.class, ignoreCase = true)
-        private String progress;
-
-        @Schema(title = "임시 삭제 여부", description = "(true|false) 중 하나를 입력",
-                example = "false", allowableValues = {"true", "false"})
-        @NotNull(message = "값이 비어있을 수 없습니다. 값을 입력해주세요.")
-        private Boolean isDeleted;
-
-        public Priority getPriority() {
-            return (priority == null) ? null : Priority.valueOf(priority);
-        }
-
-        public Progress getProgress() {
-            return (progress == null) ? null : Progress.valueOf(progress);
-        }
-    }
-
-
     @Schema(description = "투두 수정 요청 DTO")
     @Getter
     @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -108,8 +77,8 @@ public interface TodoReq {
                 example = "2024-05-20T12:00:00Z")
         private LocalDateTime deadline;
 
-        @Schema(title = "우선 순위", description = "(NONE|PRIMARY|SECONDARY|TERTIARY) 중 하나를 대소문자 구분 없이 입력",
-                example = "PRIMARY", allowableValues = {"NONE", "PRIMARY", "SECONDARY", "TERTIARY"})
+        @Schema(title = "우선 순위", description = "(PRIMARY|SECONDARY|TERTIARY) 중 하나를 대소문자 구분 없이 입력",
+                example = "PRIMARY", allowableValues = {"PRIMARY", "SECONDARY", "TERTIARY"})
         @NotNull(message = "값이 비어있을 수 없습니다. 값을 입력해주세요.")
         @Enum(enumClass = Priority.class, ignoreCase = true)
         private String priority;
