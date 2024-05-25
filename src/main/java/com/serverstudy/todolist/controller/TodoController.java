@@ -114,10 +114,7 @@ public class TodoController implements ExampleData {
     @Operation(summary = "투두 삭제", description = "해당 투두를 삭제합니다.", parameters = {
             @Parameter(name = "todoId", description = "투두 id", example = "1")
     }, responses = {
-            @ApiResponse(responseCode = "204", description = "투두 삭제 성공", content = @Content(schema = @Schema(implementation = Void.class))),
-            @ApiResponse(responseCode = "404", description = "투두가 존재하지 않음", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
-                    @ExampleObject(name = "TODO_NOT_FOUND", value = TODO_NOT_FOUND_DATA),
-            }))
+            @ApiResponse(responseCode = "204", description = "투두 삭제 성공", content = @Content(schema = @Schema(implementation = Void.class)))
     })
     @DeleteMapping("/{todoId}")
     public ResponseEntity<Long> deleteTodo(@PathVariable Long todoId) {

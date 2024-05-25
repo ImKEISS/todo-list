@@ -79,8 +79,7 @@ public class TodoService {
     @Transactional
     public void delete(Long todoId) {
 
-        Todo todo = getTodo(todoId);
-        todoRepository.delete(todo);
+        todoRepository.deleteById(todoId);
     }
 
     private Todo getTodo(Long todoId) {
