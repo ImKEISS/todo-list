@@ -74,12 +74,10 @@ public class UserService {
     @Transactional
     public void delete(Long userId) {
 
-        User user = getUser(userId);
-
         // 투두 리스트 삭제
         todoRepository.deleteAll(todoRepository.findAllByUserId(userId));
 
-        userRepository.delete(user);
+        userRepository.deleteById(userId);
     }
 
     private User getUser(Long userId) {
