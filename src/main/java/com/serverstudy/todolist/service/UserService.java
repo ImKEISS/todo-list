@@ -110,7 +110,7 @@ public class UserService {
     public void delete(Long userId) {
 
         // 투두 리스트 삭제
-        todoRepository.deleteAll(todoRepository.findAllByUserId(userId));
+        todoRepository.deleteAllInBatch(todoRepository.findAllByUserId(userId));
 
         userRepository.deleteById(userId);
     }
@@ -139,6 +139,17 @@ public class UserService {
                         .nickname(user.getNickname())
                         .build()
                 ).toList();
+    }
+
+    @Transactional
+    public void deleteAll() {
+
+        todoRepository.deleteAllInBatch();
+        userRepository.deleteAllInBatch(
+                userRepository.findAll().stream()
+                        .filter(user -> !user.getEmail().equals("ADMIN"))   // 관리자 제외
+                        .toList()
+        );
     }
 
     private User getUser(Long userId) {

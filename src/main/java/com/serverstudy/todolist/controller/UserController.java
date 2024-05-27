@@ -189,4 +189,16 @@ public class UserController implements ExampleData {
         return ResponseEntity.ok(userResList);
     }
 
+    @Operation(summary = "모든 유저 삭제", description = "모든 유저를 삭제합니다. 관리자 계정으로 로그인 되어 있어야 합니다.", responses = {
+            @ApiResponse(responseCode = "204", description = "삭제 성공", useReturnTypeSchema = true),
+    })
+    @Secured("ROLE_ADMIN")
+    @DeleteMapping("/admin")
+    public ResponseEntity<Void> deleteAllUsers() {
+
+        userService.deleteAll();
+
+        return ResponseEntity.noContent().build();
+    }
+
 }
