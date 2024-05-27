@@ -1,19 +1,25 @@
 package com.serverstudy.todolist.service;
 
 import com.serverstudy.todolist.domain.User;
+import com.serverstudy.todolist.domain.enums.Role;
+import com.serverstudy.todolist.dto.request.UserReq;
 import com.serverstudy.todolist.dto.request.UserReq.UserPatchNickname;
 import com.serverstudy.todolist.dto.request.UserReq.UserPatchPassword;
 import com.serverstudy.todolist.dto.request.UserReq.UserPost;
+import com.serverstudy.todolist.dto.response.JwtRes;
 import com.serverstudy.todolist.dto.response.UserRes;
 import com.serverstudy.todolist.exception.CustomException;
 import com.serverstudy.todolist.repository.TodoRepository;
 import com.serverstudy.todolist.repository.UserRepository;
+import com.serverstudy.todolist.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.serverstudy.todolist.exception.ErrorCode.DUPLICATE_USER_EMAIL;
-import static com.serverstudy.todolist.exception.ErrorCode.USER_NOT_FOUND;
+import java.util.List;
+
+import static com.serverstudy.todolist.exception.ErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -22,15 +28,23 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final TodoRepository todoRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @Transactional
-    public long join(UserPost userPost) {
+    public JwtRes join(UserPost userPost) {
 
         checkEmailDuplicated(userPost.getEmail());
 
-        User user = userPost.toEntity();
+        String encodedPassword = passwordEncoder.encode(userPost.getPassword());
 
-        return userRepository.save(user).getId();
+        User user = userRepository.save(
+                userPost.toEntity(encodedPassword)
+        );
+
+        return JwtRes.builder()
+                .accessToken(jwtTokenProvider.createToken(user.getEmail()))
+                .build();
     }
 
     public void checkEmailDuplicated(String email) {
@@ -38,6 +52,21 @@ public class UserService {
         if (userRepository.existsByEmail(email)) {
             throw new CustomException(DUPLICATE_USER_EMAIL);
         }
+    }
+
+    public JwtRes login (UserReq.UserLoginPost userLoginPost) {
+
+        // 이메일 불일치
+        User user = userRepository.findByEmail(userLoginPost.getEmail())
+                .orElseThrow(() -> new CustomException(BAD_CREDENTIALS));
+        // 비밀번호 불일치
+        if (!passwordEncoder.matches(userLoginPost.getPassword(), user.getPassword())) {
+            throw new CustomException(BAD_CREDENTIALS);
+        }
+
+        return JwtRes.builder()
+                .accessToken(jwtTokenProvider.createToken(user.getEmail()))
+                .build();
     }
 
     public UserRes get(Long userId) {
@@ -66,7 +95,13 @@ public class UserService {
 
         User user = getUser(userId);
 
-        user.modifyPassword(userPatchPassword);
+        // 비밀번호 불일치
+        if (!passwordEncoder.matches(userPatchPassword.getExistingPassword(), user.getPassword())) {
+            throw new CustomException(BAD_PASSWORD);
+        }
+
+        String encodedNewPassword = passwordEncoder.encode(userPatchPassword.getNewPassword());
+        user.modifyPassword(encodedNewPassword);
 
         return user.getId();
     }
@@ -78,6 +113,32 @@ public class UserService {
         todoRepository.deleteAll(todoRepository.findAllByUserId(userId));
 
         userRepository.deleteById(userId);
+    }
+
+    @Transactional
+    public JwtRes getAdmin() {
+
+        User admin = userRepository.findByEmail("ADMIN").orElseGet(() -> {
+            User user = User.builder().email("ADMIN").nickname("ADMIN").password("ADMIN").build();
+            user.addRole(Role.ADMIN);
+            return userRepository.save(user);
+        });
+
+        return JwtRes.builder()
+                .accessToken(jwtTokenProvider.createToken(admin.getEmail()))
+                .build();
+    }
+
+    public List<UserRes> getAll() {
+
+        return userRepository.findAll().stream()
+                .filter(user -> !user.getEmail().equals("ADMIN"))   // 관리자 제외
+                .map(user -> UserRes.builder()
+                        .id(user.getId())
+                        .email(user.getEmail())
+                        .nickname(user.getNickname())
+                        .build()
+                ).toList();
     }
 
     private User getUser(Long userId) {

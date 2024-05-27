@@ -1,11 +1,14 @@
 package com.serverstudy.todolist.controller;
 
 import com.serverstudy.todolist.common.ExampleData;
+import com.serverstudy.todolist.dto.request.UserReq;
 import com.serverstudy.todolist.dto.request.UserReq.UserPatchNickname;
 import com.serverstudy.todolist.dto.request.UserReq.UserPatchPassword;
 import com.serverstudy.todolist.dto.request.UserReq.UserPost;
+import com.serverstudy.todolist.dto.response.JwtRes;
 import com.serverstudy.todolist.dto.response.UserRes;
 import com.serverstudy.todolist.exception.ErrorResponse;
+import com.serverstudy.todolist.security.SecurityUser;
 import com.serverstudy.todolist.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -16,18 +19,21 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Tag(name = "User", description = "User API 입니다.")
 @Validated
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/api/users")
 @CrossOrigin(origins = "*")
 @RequiredArgsConstructor
 public class UserController implements ExampleData {
@@ -44,14 +50,14 @@ public class UserController implements ExampleData {
             }))
     })
     @PostMapping
-    public ResponseEntity<Long> postUser(@Valid @RequestBody UserPost userPost) {
+    public ResponseEntity<JwtRes> postUser(@Valid @RequestBody UserPost userPost) {
 
-        Long userId = userService.join(userPost);
+        JwtRes token = userService.join(userPost);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(userId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(token);
     }
 
-    @Operation(summary = "이메일 중복 검사", description = "이메일의 중복 여부를 검사합니다.", deprecated = true, parameters = {
+    @Operation(summary = "이메일 중복 검사", description = "이메일의 중복 여부를 검사합니다.", parameters = {
             @Parameter(name = "email", description = "중복 검사할 이메일", example = "example@gmail.com")
     }, responses = {
             @ApiResponse(responseCode = "200", description = "중복 없음", useReturnTypeSchema = true),
@@ -74,9 +80,24 @@ public class UserController implements ExampleData {
         return ResponseEntity.ok(email);
     }
 
-    @Operation(summary = "유저 조회", description = "해당 유저의 정보를 조회합니다.", parameters = {
-            @Parameter(name = "userId", description = "유저 Id", example = "1")
-    }, responses = {
+    @Operation(summary = "유저 로그인", description = "해당 유저로 로그인합니다.", responses = {
+            @ApiResponse(responseCode = "200", description = "유저 로그인 성공", useReturnTypeSchema = true),
+            @ApiResponse(responseCode = "400", description = "잘못된 파라미터 입력", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
+                    @ExampleObject(name = "INVALID_PARAMETER", value = INVALID_PARAMETER_DATA),
+            })),
+            @ApiResponse(responseCode = "401", description = "이메일 또는 비밀번호 불일치", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
+                    @ExampleObject(name = "BAD_CREDENTIALS", value = BAD_CREDENTIALS_DATA),
+            }))
+    })
+    @PostMapping("/login")
+    public ResponseEntity<JwtRes> login(@RequestBody UserReq.UserLoginPost loginDto) {
+
+        JwtRes token = userService.login(loginDto);
+
+        return ResponseEntity.ok(token);
+    }
+
+    @Operation(summary = "유저 조회", description = "해당 유저의 정보를 조회합니다.", responses = {
             @ApiResponse(responseCode = "200", description = "유저 조회 성공", useReturnTypeSchema = true),
             @ApiResponse(responseCode = "400", description = "잘못된 파라미터 입력", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
                     @ExampleObject(name = "INVALID_PARAMETER", value = INVALID_PARAMETER_DATA),
@@ -86,16 +107,14 @@ public class UserController implements ExampleData {
             }))
     })
     @GetMapping
-    public ResponseEntity<UserRes> getUser(@NotNull Long userId) {
+    public ResponseEntity<UserRes> getUser(@AuthenticationPrincipal SecurityUser user) {
 
-        UserRes response = userService.get(userId);
+        UserRes response = userService.get(user.getId());
 
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "유저 닉네임 수정", description = "해당 유저의 닉네임을 수정합니다.", parameters = {
-            @Parameter(name = "userId", description = "유저 Id", example = "1")
-    }, responses = {
+    @Operation(summary = "유저 닉네임 수정", description = "해당 유저의 닉네임을 수정합니다.", responses = {
             @ApiResponse(responseCode = "200", description = "유저 닉네임 수정 성공", useReturnTypeSchema = true),
             @ApiResponse(responseCode = "400", description = "잘못된 파라미터 입력", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
                     @ExampleObject(name = "INVALID_PARAMETER", value = INVALID_PARAMETER_DATA),
@@ -105,16 +124,14 @@ public class UserController implements ExampleData {
             }))
     })
     @PatchMapping("/nickname")
-    public ResponseEntity<Long> patchUserNickname(@Valid @RequestBody UserPatchNickname userPatchNickname, @NotNull Long userId) {
+    public ResponseEntity<Long> patchUserNickname(@Valid @RequestBody UserPatchNickname userPatchNickname, @AuthenticationPrincipal SecurityUser user) {
 
-        Long modifiedUserId = userService.modifyNickname(userPatchNickname, userId);
+        Long modifiedUserId = userService.modifyNickname(userPatchNickname, user.getId());
 
         return ResponseEntity.ok(modifiedUserId);
     }
 
-    @Operation(summary = "유저 비밀번호 수정", description = "해당 유저의 비밀번호를 수정합니다.", parameters = {
-            @Parameter(name = "userId", description = "유저 Id", example = "1")
-    }, responses = {
+    @Operation(summary = "유저 비밀번호 수정", description = "해당 유저의 비밀번호를 수정합니다.", responses = {
             @ApiResponse(responseCode = "200", description = "유저 비밀번호 수정 성공", useReturnTypeSchema = true),
             @ApiResponse(responseCode = "400", description = "잘못된 파라미터 입력", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
                     @ExampleObject(name = "INVALID_PARAMETER", value = INVALID_PARAMETER_DATA),
@@ -127,28 +144,49 @@ public class UserController implements ExampleData {
             }))
     })
     @PatchMapping("/password")
-    public ResponseEntity<Long> patchUserPassword(@Valid @RequestBody UserPatchPassword userPatchPassword, @NotNull Long userId) {
+    public ResponseEntity<Long> patchUserPassword(@Valid @RequestBody UserPatchPassword userPatchPassword, @AuthenticationPrincipal SecurityUser user) {
 
-        Long modifiedUserId = userService.modifyPassword(userPatchPassword, userId);
+        Long modifiedUserId = userService.modifyPassword(userPatchPassword, user.getId());
 
         return ResponseEntity.ok(modifiedUserId);
     }
 
 
-    @Operation(summary = "유저 삭제", description = "해당 유저를 삭제합니다.", parameters = {
-            @Parameter(name = "userId", description = "유저 Id", example = "1")
-    }, responses = {
+    @Operation(summary = "유저 삭제", description = "해당 유저를 삭제합니다.", responses = {
             @ApiResponse(responseCode = "204", description = "유저 삭제 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 파라미터 입력", content = @Content(schema = @Schema(implementation = ErrorResponse.class), examples = {
                     @ExampleObject(name = "INVALID_PARAMETER", value = INVALID_PARAMETER_DATA),
             })),
     })
     @DeleteMapping
-    public ResponseEntity<Void> deleteUser(@NotNull Long userId) {
+    public ResponseEntity<Void> deleteUser(@AuthenticationPrincipal SecurityUser user) {
 
-        userService.delete(userId);
+        userService.delete(user.getId());
 
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "관리자 로그인", description = "관리자 계정으로 로그인합니다.", responses = {
+            @ApiResponse(responseCode = "200", description = "관리자 로그인 성공", useReturnTypeSchema = true),
+    })
+    @PostMapping("/admin")
+    public ResponseEntity<JwtRes> getAdmin() {
+
+        JwtRes token = userService.getAdmin();
+
+        return ResponseEntity.ok(token);
+    }
+
+    @Operation(summary = "모든 유저 정보 조회", description = "모든 유저 정보를 조회합니다. 관리자 계정으로 로그인 되어 있어야 합니다.", responses = {
+            @ApiResponse(responseCode = "200", description = "조회 성공", useReturnTypeSchema = true),
+    })
+    @Secured("ROLE_ADMIN")
+    @GetMapping("/admin")
+    public ResponseEntity<List<UserRes>> getAllUsers() {
+
+        List<UserRes> userResList = userService.getAll();
+
+        return ResponseEntity.ok(userResList);
     }
 
 }
