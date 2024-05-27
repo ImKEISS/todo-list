@@ -66,8 +66,7 @@ public class SecurityConfig {
     public WebSecurityCustomizer webSecurityCustomizer()
     {
         return web -> web.ignoring()
-                .requestMatchers(permitUrlArray)
-                .requestMatchers(PathRequest.toH2Console());
+                .requestMatchers(permitUrlArray);
     }
 
 }
