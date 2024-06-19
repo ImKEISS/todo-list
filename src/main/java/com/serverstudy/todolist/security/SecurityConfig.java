@@ -49,9 +49,10 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(requests -> {
-                    requests.requestMatchers(HttpMethod.POST, "api/users").permitAll(); // 회원가입
-                    requests.requestMatchers(HttpMethod.POST, "api/users/admin").permitAll(); // 관리자 로그인
-                    requests.requestMatchers("/api/users/login").permitAll();    // 로그인
+                    requests.requestMatchers(HttpMethod.POST,"api/users").permitAll();  // 회원가입
+                    requests.requestMatchers(HttpMethod.GET,"api/users/check-email").permitAll();   // 이메일 중복 검사
+                    requests.requestMatchers(HttpMethod.POST,"api/users/admin").permitAll();    // 관리자 로그인
+                    requests.requestMatchers(HttpMethod.POST,"/api/users/login").permitAll();   // 로그인
                     requests.requestMatchers("/api/**").authenticated();})
                 .sessionManagement(sessionManagement ->
                         sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
