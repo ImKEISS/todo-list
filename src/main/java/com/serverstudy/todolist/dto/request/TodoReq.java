@@ -34,8 +34,8 @@ public interface TodoReq {
                 example = "2024-05-15T23:59:00Z")
         private LocalDateTime deadline;
 
-        @Schema(title = "우선 순위", description = "(PRIMARY|SECONDARY|TERTIARY) 중 하나를 대소문자 구분 없이 입력",
-                example = "PRIMARY", allowableValues = {"PRIMARY", "SECONDARY", "TERTIARY"})
+        @Schema(title = "우선 순위", description = "(High|Medium|Low) 중 하나를 대소문자 구분 없이 입력",
+                example = "High", allowableValues = {"High", "Medium", "Low"})
         @NotNull(message = "값이 비어있을 수 없습니다. 값을 입력해주세요.")
         @Enum(enumClass = Priority.class, ignoreCase = true)
         private String priority;
@@ -77,8 +77,8 @@ public interface TodoReq {
                 example = "2024-05-20T12:00:00Z")
         private LocalDateTime deadline;
 
-        @Schema(title = "우선 순위", description = "(PRIMARY|SECONDARY|TERTIARY) 중 하나를 대소문자 구분 없이 입력",
-                example = "PRIMARY", allowableValues = {"PRIMARY", "SECONDARY", "TERTIARY"})
+        @Schema(title = "우선 순위", description = "(High|Medium|Low) 중 하나를 대소문자 구분 없이 입력",
+                example = "High", allowableValues = {"High", "Medium", "Low"})
         @NotNull(message = "값이 비어있을 수 없습니다. 값을 입력해주세요.")
         @Enum(enumClass = Priority.class, ignoreCase = true)
         private String priority;

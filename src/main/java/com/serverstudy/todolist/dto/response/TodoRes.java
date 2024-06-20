@@ -24,7 +24,7 @@ public class TodoRes {
     @Schema(title = "마감 기한", description = "마감 기한", example = "2024-05-15T23:59:00Z")
     private final LocalDateTime deadline;
 
-    @Schema(title = "우선 순위", description = "우선 순위", example = "PRIMARY")
+    @Schema(title = "우선 순위", description = "우선 순위", example = "High")
     private final Priority priority;
 
     @Schema(title = "진행 상황", description = "진행 상황", example = "DONE")

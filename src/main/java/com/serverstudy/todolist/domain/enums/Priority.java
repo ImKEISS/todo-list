@@ -6,7 +6,7 @@ import java.util.Arrays;
 
 @Getter
 public enum Priority {
-    NONE, PRIMARY, SECONDARY, TERTIARY;
+    None, High, Medium, Low;
 
     public static Priority getPriority(String inputPriority) {
 
